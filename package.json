@@ -1,5 +1,5 @@
 {
-  "name": "gaming-service",
+  "name": "gaming-service-project",
   "version": "1.0.0",
   "description": "Gaming service for cards to fight eachother",
   "main": "index.ts",
@@ -18,6 +18,6 @@
   },
   "dependencies": {
     "express": "^4.21.2",
-    "gaming-service": "file:"
+    "socket.io": "^4.8.1"
   }
 }
