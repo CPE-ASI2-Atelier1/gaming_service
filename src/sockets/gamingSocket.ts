@@ -23,12 +23,25 @@ interface ActionData {
 export class Socket {
     private io;
 
+    private sockerMap : Map<number, number>;
+
     constructor(server:any) {
+
         this.io = new Server(server);
         this.io.on("connection", (socket:any): void => {
-            socket.on(ACTIONS.RECEIVE_ACTION, (data: ActionData) :void => {
+            // userId = socket.handshake.query.userId;
+            // sockerMap.set(userId, socket.id
+            socket.on(ACTIONS.SEND_ACTION, (data: ActionData) :void => {
                 GameService.processAction(data.userId, data.enemyId, data.deck);
             })
+            //socket.on(ACTIONS.SEND_MESSAGE, (data: ActionData) :void => {
+                // ChatService.doSmth()
+                // if ok :
+                //      socketReceiver = map.get(userId2)
+                //      socker.emit(RECEIVE_MESSAGE, truc)
+                // else:
+                //      catastrophe
+            //})
         })
     }
 }
