@@ -2,6 +2,8 @@ import express from 'express';
 // @ts-ignore
 import CONFIG = require('../config.json');
 import {createServer} from "node:http";
+import { Socket } from './sockets/gamingSocket';
+import path from "path";
 /**
  *
  */
@@ -19,6 +21,7 @@ class MyApp {
 
         //////////////// MIDDLEWARES /////////////////
         //this.application.use(express.static(CONFIG.www)); // Serve static content
+        this.application.use(express.static(path.join(__dirname, "../static")));
         this.application.use(express.json()); // ability to parse JSON for POST requests
         this.application.use((req, res, next) => { // Debugging (prints requests)
             console.log(`Received ${req.method} request for ${req.url}`);
@@ -29,7 +32,8 @@ class MyApp {
         // Can be tested through PostMan
 
         ///////////////// SOCKETS ///////////////////
-        // For now, index.html sends form data to the socket (UserSocket)
+        const socket = new Socket(this.server);
+
 
         ////////////////// LISTEN ///////////////////
         // NB : When we use application.listen instead, express creates an internal http server... But it is not accessible

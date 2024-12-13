@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Client</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="chat.js" defer></script>
+</head>
+<body>
+    <h1>Chat Application</h1>
+    <div>
+        <label for="userId">User ID: </label>
+        <input type="number" id="userId" placeholder="Enter your user ID">
+        <button onclick="connect()">Connect</button>
+    </div>
+
+    <div id="chat" style="display:none;">
+        <h2>Chat</h2>
+        <label for="receiverId">Receiver ID: </label>
+        <input type="number" id="receiverId" placeholder="Enter receiver ID">
+        <br>
+        <label for="message">Message: </label>
+        <input type="text" id="message" placeholder="Type a message">
+        <button onclick="sendMessage()">Send</button>
+        <ul id="messages"></ul>
+    </div>
+</body>
+</html>

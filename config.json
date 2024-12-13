@@ -1,6 +1,6 @@
 {
   "www" : "../www",
-  "port" : 8085,
+  "port" : 3000,
   "queue_port" : 61613,
   "host"  : "localhost"
 }
