@@ -1,4 +1,7 @@
 let socket;
+let senderId;
+let receiverId;
+let messagesList;
 
 function connect() {
     const userId = document.getElementById("userId").value;
@@ -10,7 +13,24 @@ function connect() {
         document.getElementById("chat").style.display = "block";
     });
 
+    socket.on("ON_USER_SELECTED", (data) => {
+        messagesList = document.getElementById("messages");
+        receiverId = document.getElementById("receiverId").value;
+        senderId = document.getElementById("userId").value;
+
+        console.log("On recoit un historique !")
+        data.messages.forEach((msg) => {
+            const messageItem = document.createElement("li");
+            messageItem.textContent = `${msg.sender === senderId ? "You" : "User " + msg.sender}: ${msg.message}`;
+            messageItem.style.color = msg.sender === senderId ? "blue" : "green";
+            messagesList.appendChild(messageItem);
+        });
+    })
+
     socket.on("RECEIVE_MESSAGE", (data) => {
+
+        // senderid =/= received senderId => je ne fais rien !
+        // SAUF si mon sender id est 0 => broadcast 
         const messages = document.getElementById("messages");
         const newMessage = document.createElement("li");
         newMessage.textContent = `From ${data.senderId}: ${data.message}`;
@@ -32,8 +52,22 @@ function connect() {
     });
 }
 
+function retrieveMessage() {
+    receiverId = document.getElementById("receiverId").value;
+    senderId = document.getElementById("userId").value;
+
+    if (!receiverId || !senderId) {
+        console.warn("Both senderId and receiverId are required.");
+        return;
+    }
+    messagesList = document.getElementById("messages");
+    messagesList.innerHTML = "";
+
+    socket.emit("ON_USER_SELECT", { senderId, receiverId });
+}
+
 function sendMessage() {
-    const receiverId = document.getElementById("receiverId").value;
+    receiverId = document.getElementById("receiverId").value;
     const message = document.getElementById("message").value;
 
     const messages = document.getElementById("messages");
