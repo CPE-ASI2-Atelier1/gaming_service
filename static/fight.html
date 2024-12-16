@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matchmaking Client</title>
+    <script src="/socket.io/socket.io.js" defer></script>
+    <script src="fight.js" defer></script>
+</head>
+<body>
+<h1>Fight Application</h1>
+<div>
+    <label for="userId">User ID: </label>
+    <input type="number" id="userId" placeholder="Enter your user ID">
+    <button id="connectBtn">Connect</button>
+</div>
+<button id="fight" onclick="fight()">Fight!</button>
+<div id="status"></div>
+<div id="game-status"></div>
+
+<div id="card-selection" style="display:none;">
+    <h2>Select up to 4 cards:</h2>
+    <div id="cards">
+        <!-- Dummy cards for testing -->
+        <label><input type="checkbox" value="1"> Card 1 (Attack: 10, Defense: 5)</label><br>
+        <label><input type="checkbox" value="2"> Card 2 (Attack: 15, Defense: 3)</label><br>
+        <label><input type="checkbox" value="3"> Card 3 (Attack: 7, Defense: 8)</label><br>
+        <label><input type="checkbox" value="4"> Card 4 (Attack: 20, Defense: 1)</label><br>
+        <label><input type="checkbox" value="5"> Card 5 (Attack: 5, Defense: 10)</label><br>
+    </div>
+    <button id="confirmCards">Confirm Cards</button>
+</div>
+<div id="battle-controls" style="display:none;">
+    <h2>Battle Controls</h2>
+    <p id="energy-status">Energy: 100</p>
+    <div>
+        <label>Choose your card:</label>
+        <select id="attack-card">
+            <option value="1">Card 1 (Attack: 10, Energy: 20)</option>
+            <option value="2">Card 2 (Attack: 15, Energy: 30)</option>
+            <option value="3">Card 3 (Attack: 20, Energy: 40)</option>
+        </select>
+    </div>
+    <div>
+        <label>Choose target card:</label>
+        <select id="target-card">
+            <option value="1">Target Card 1</option>
+            <option value="2">Target Card 2</option>
+            <option value="3">Target Card 3</option>
+        </select>
+    </div>
+    <div id="enemy-cards">
+        <h3>Enemy's Cards</h3>
+        <p id="enemy-cards-list">Waiting for enemy cards...</p>
+    </div>
+    <button onclick="attackCard()">Attack</button>
+    <button onclick="endTurn()">End Turn</button>
+</div>
+
+<script>
+    function attackCard() {
+        const cardId = document.getElementById("attack-card").value;
+        const targetId = document.getElementById("target-card").value;
+        const energyCost = 20; // Dummy cost, update as needed
+        attack(Number(cardId), Number(targetId), energyCost);
+    }
+</script>
+
+</body>
+</html>

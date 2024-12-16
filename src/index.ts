@@ -21,6 +21,7 @@ class MyApp {
 
         //////////////// MIDDLEWARES /////////////////
         //this.application.use(express.static(CONFIG.www)); // Serve static content
+        this.application.disable('x-powered-by');
         this.application.use(express.static(path.join(__dirname, "../static")));
         this.application.use(express.json()); // ability to parse JSON for POST requests
         this.application.use((req, res, next) => { // Debugging (prints requests)
