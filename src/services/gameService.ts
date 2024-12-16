@@ -77,6 +77,14 @@ export default class GameService {
      * @return Id of the enemy user if the game is ready, else returns 0
      */
     public processWaitingCards(userId: number, cards:CardData[]): number{
+        // Check cards
+        for (let card of cards) {
+            if (!this.checkCard(card)) {
+                console.log(`Cards provided by user ${userId} are not valid.`)
+                // Error handling
+                return -1;
+            }
+        }
         // Set user cards
         const game = this.games.get(userId);
         game.setCards(userId, cards);
@@ -94,6 +102,10 @@ export default class GameService {
     public processAction(userId: number, cardId: number, targetId: number): number {
         return this.games.get(userId).processAction(userId, cardId, targetId);
         // Error handling ?
+    }
+
+    public isGameOver(userId: number): number {
+        return this.games.get(userId).isGameOver();
     }
 
     public getUserCardIds(userId: number): number[] {
@@ -124,4 +136,41 @@ export default class GameService {
         this.games.removeByUser(userId);
         return otherUserId;
     }
+
+    /**
+     * Vérifie si une carte est valide.
+     * @param card La carte à vérifier.
+     * @returns true si la carte est valide, sinon false.
+     */
+    private checkCard(card: CardData): boolean {
+        if (!card) {
+            console.error("Invalid card: card is undefined or null.");
+            return false;
+        }
+
+        const { id, attack, defence, energy, hp } = card;
+
+        // Check if all values are defined
+        if (
+            id === undefined || attack === undefined || defence === undefined ||
+            energy === undefined || hp === undefined
+        ) {
+            console.error("Invalid card: some properties are undefined.", card);
+            return false;
+        }
+
+        // Check types
+        if (
+            typeof id !== "number" || id < 0 ||
+            typeof attack !== "number" || attack < 0 ||
+            typeof defence !== "number" || defence < 0 ||
+            typeof energy !== "number" || energy < 0 ||
+            typeof hp !== "number" || hp <= 0
+        ) {
+            console.error("Invalid card: one or more properties have invalid values.", card);
+            return false;
+        }
+        return true;
+    }
+
 }

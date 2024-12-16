@@ -22,6 +22,9 @@ enum GAME_ACTIONS {
     START_TURN = "START_TURN",          // Emitted when it is a user turn to play
     GAME_STARTS = "GAME_STARTS",        // Emitted when matchmaking is completed
     CARD_SELECTION = "CARD_SELECTION",  // Emitted to warn user that they must pick their cards
+    ACTION_SUCCESS = "ACTION_SUCCESS",  // Emitted if an action was successfully handled
+    ACTION_FAILED = "ACTION_FAILED",    // Emitted if an action failed to be handled
+    GAME_OVER = "GAME_OVER",            // Emitted when the game is over
 }
 
 export interface MessageData {
@@ -120,13 +123,13 @@ export class Socket {
                     this.io.to(enemySocketId).emit(GAME_ACTIONS.GAME_STARTS, {
                         cardsIds: userCardsIds
                     })
-                    this.io.to(socket.id).emit(GAME_ACTIONS.GAME_STARTS, {
+                    socket.emit(GAME_ACTIONS.GAME_STARTS, {
                         cardsIds: enemyCardsIds
                     })
                     // randomly chooses who starts
                     const random: number = Math.random()
                     const startingId: number = random > 0.5 ? enemySocketId : socket.id;
-                    console.log(`User ${random > 0.5 ? id : enemyId} is starting the fight.`)
+                    console.log(`User ${random > 0.5 ? enemyId : id} is starting the fight.`)
                     this.io.to(startingId).emit(GAME_ACTIONS.START_TURN)
                 }
             })
@@ -137,20 +140,61 @@ export class Socket {
                 console.log(`Received action from user ${userId} : attacking card ${targetId} with card ${cardId}`)
                 // Process attack
                 const damage: number = this.gameService.processAction(userId, cardId, targetId);
-                if (damage === -1) {
-                    // ERROR HANDLING
-                    return
+                if (damage < 0) {
+                    let errorMessage: string;
+                    switch (damage) {
+                        case -1:
+                            errorMessage = "User deck could not be found.";
+                            break;
+                        case -2:
+                            errorMessage = "Enemy deck could not be found.";
+                            break;
+                        case -3:
+                            errorMessage = "The card could not be found.";
+                            break;
+                        case -4:
+                            errorMessage = "The target card could not be found.";
+                            break;
+                        default:
+                            errorMessage = "An unknown error occurred.";
+                    }
+                    console.error(`Error in action processing: ${errorMessage}`);
+                    socket.emit(GAME_ACTIONS.ACTION_FAILED, {
+                        message: errorMessage,
+                        code: damage
+                    });
+                    return;
                 }
+                // Send what happened to the other user
                 const enemyId: number = this.gameService.getOtherPlayer(userId)
                 if (enemyId === -1) {
                     return
                 }
-                const enemySocket: number = this.socketMap.get(enemyId)
-                // Send what happened to the other user
-                this.io.to(enemySocket).emit(GAME_ACTIONS.RECEIVE_ACTION, {
+                const enemySocketId: number = this.socketMap.get(enemyId)
+                if (!enemySocketId) {
+                    console.error(`Socket not found for enemy ${enemyId}`);
+                    return;
+                }
+                this.io.to(enemySocketId).emit(GAME_ACTIONS.RECEIVE_ACTION, {
                     cardId: targetId,
                     damage: damage
                 })
+                socket.emit(GAME_ACTIONS.ACTION_SUCCESS)
+                // Check if the battle is over
+                const status: number = this.gameService.isGameOver(userId)
+                if (status > 0) {
+                    // Notify both players of the game result
+                    const winnerSocketId: number = this.socketMap.get(status);
+                    const loserSocketId: number = this.socketMap.get(status === userId ? enemyId : userId);
+
+                    if (winnerSocketId) {
+                        this.io.to(winnerSocketId).emit(GAME_ACTIONS.GAME_OVER, { result: "win", award: 100 });
+                    }
+                    if (loserSocketId) {
+                        this.io.to(loserSocketId).emit(GAME_ACTIONS.GAME_OVER, { result: "lose", award: 0 });
+                    }
+                    console.log(`Game over: User ${status} wins`);
+                }
             })
 
             socket.on(GAME_ACTIONS.END_TURN, (data: UserData): void => {

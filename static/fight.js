@@ -67,6 +67,28 @@ document.getElementById("connectBtn").addEventListener("click", () => {
     socket.on("END_TURN", () => {
         document.getElementById("game-status").innerText = "Opponent's turn. Waiting...";
     });
+
+    socket.on("GAME_OVER", (data) => {
+        const { result, award } = data;
+
+        // Masquer les contrôles de combat
+        document.getElementById("battle-controls").style.display = "none";
+
+        // Afficher les résultats
+        const gameResult = document.getElementById("game-result");
+        const gameOverDiv = document.getElementById("game-over");
+
+        gameResult.innerText = `Game Over! You ${result}! Award: ${award} points`;
+        gameOverDiv.style.display = "block";
+
+        console.log(`Game over: You ${result}, award: ${award}`);
+    });
+
+    socket.on("ACTION_FAILED", (data) => {
+        const { message, code } = data;
+        console.error(`Action failed (code: ${code}): ${message}`);
+        alert(`Error: ${message}`);
+    });
 });
 
 document.getElementById("confirmCards").addEventListener("click", () => {
@@ -83,7 +105,7 @@ document.getElementById("confirmCards").addEventListener("click", () => {
             selectedCards.push({
                 id: parseInt(checkbox.value),
                 attack: 10, // Dummy values for testing
-                defense: 5, // Dummy values for testing
+                defence: 5, // Dummy values for testing
                 energy: 3,  // Dummy values for testing
                 hp: 20     // Dummy values for testing
             });

@@ -27,6 +27,10 @@ class FightingCard {
     public static createFromData(card: CardData) {
         return new FightingCard(card.id, card.attack, card.defence, card.energy, card.hp);
     }
+
+    public toString(): string {
+        return `Card(id: ${this.id}, attack: ${this.attack}, defence: ${this.defence}, energy: ${this.energy}, hp: ${this.currentHp}/${this.hp})`;
+    }
 }
 // JAVASCRIPT DOES NOT HANDLE CONSTRUCTOR OR METHOD OVERLOADING...
 // Puis les interfaces ne sont pas de vraies interfaces...
@@ -41,14 +45,6 @@ class UserDeck {
         this.userId = userId;
         this.cards = cards;
     }
-
-    // public static createFromData(userId: number, cards: CardData[]) {
-    //     const deck: FightingCard[] = [];
-    //     for (let card of cards) {
-    //         deck.push(FightingCard.createFromData(card));
-    //     }
-    //     return new UserDeck(userId, deck);
-    // }
 
     public setCards(cards: CardData[]){
         this.cards = [];
@@ -68,6 +64,10 @@ class UserDeck {
             }
         }
         return null;
+    }
+
+    public toString(): string {
+        return `UserDeck(userId: ${this.userId}, cards: [${this.cards.map(card => card.toString()).join(", ")}])`;
     }
 }
 
@@ -133,22 +133,60 @@ export default class Game {
      * @param cardId
      * @param targetId
      * @return Returns damage dealt, or -1 if the action could not be handled.
+     * @errorcodes
+     *  - 1 : User's deck could not be resolved
+     *  - 2 : Enemy's deck could not be resolved
+     *  - 3 : User's card could not be resolved
+     *  - 4 : Enemy's card could not be resolved
      */
     public processAction(userId: number, cardId: number, targetId: number): number {
+        // Get deck
         const deck: UserDeck = this.getUserDeck(userId);
         const targetDeck : UserDeck = this.getUserDeck(this.getOtherUser(userId));
-        if (!deck || !targetDeck) {return -1;}
+        if (!deck) {
+            console.log("User deck could not be found.")
+            return -1;
+        }
+        if (!targetDeck) {
+            console.log("Enemy deck could not be found")
+            return -2;
+        }
+        // Get Card
         const card: FightingCard = deck.getCard(cardId)
         const targetCard: FightingCard = targetDeck.getCard(targetId);
-        if (!card || !targetCard) {return -1;}
+        if (!card || !targetCard) {
+            console.log("The card could not be found")
+            return -3;
+        }
+        if (!targetCard) {
+            console.log("The target card could not be found.")
+            return -4;
+        }
+        // Compute damage
         const critical: 1 | 1.5 = Math.random() < 0.5 ? 1 : 1.5;
         const damage: number = Math.max(( card.attack * critical ) - targetCard.defence, 0);
         if (targetCard.currentHp - damage <= 0){
-            // Logic about a card dying ?
-            targetCard.currentHp = 0;
+            const index: number = targetDeck.cards.indexOf(targetCard);
+            targetDeck.cards.splice(index, 1);
+            console.log(`Target deck: ${targetDeck.toString()}`);
+            //targetCard.currentHp = 0;
             return damage;
         }
+        console.log(`Target deck : ${targetDeck.cards}`)
         targetCard.currentHp -= damage;
         return damage;
+    }
+
+    /**
+     * If the battle is won, returns the winner's id.
+     */
+    public isGameOver(): number {
+        if( this.user1.cards.length == 0){
+            return this.user1.userId;
+        }
+        else if (this.user2.cards.length == 0) {
+            return this.user2.userId;
+        }
+        return 0
     }
 }
