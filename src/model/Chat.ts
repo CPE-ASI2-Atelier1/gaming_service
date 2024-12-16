@@ -27,6 +27,19 @@ interface Message {
     public getParticipants(): [number, number] {
         return this.participants;
       }
+
+    public toJson(): string {
+      return JSON.stringify(
+        {
+          participants: this.participants,
+          messages: this.messages.map(msg => ({
+            sender: msg.sender,
+            message: msg.message,
+            timestamp: msg.timestamp.toISOString() // Convertion au format standardisé ISO8601
+          }))
+        }
+      )
+    }
   }
   
   export default Chat;

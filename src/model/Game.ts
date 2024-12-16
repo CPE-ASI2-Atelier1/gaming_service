@@ -165,15 +165,16 @@ export default class Game {
         // Compute damage
         const critical: 1 | 1.5 = Math.random() < 0.5 ? 1 : 1.5;
         const damage: number = Math.max(( card.attack * critical ) - targetCard.defence, 0);
+        console.log(`Card received ${damage} damage.`)
         if (targetCard.currentHp - damage <= 0){
+            // Remove card if it is defeated
             const index: number = targetDeck.cards.indexOf(targetCard);
             targetDeck.cards.splice(index, 1);
-            console.log(`Target deck: ${targetDeck.toString()}`);
-            //targetCard.currentHp = 0;
+            console.log(`Target deck after card ${targetId} is defeated : ${targetDeck.toString()}`);
             return damage;
         }
-        console.log(`Target deck : ${targetDeck.cards}`)
         targetCard.currentHp -= damage;
+        console.log(`Target deck after attack : ${targetDeck.toString()}`);
         return damage;
     }
 
@@ -182,10 +183,10 @@ export default class Game {
      */
     public isGameOver(): number {
         if( this.user1.cards.length == 0){
-            return this.user1.userId;
+            return this.user2.userId;
         }
         else if (this.user2.cards.length == 0) {
-            return this.user2.userId;
+            return this.user1.userId;
         }
         return 0
     }

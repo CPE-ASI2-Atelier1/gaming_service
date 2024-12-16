@@ -78,7 +78,14 @@ document.getElementById("connectBtn").addEventListener("click", () => {
         const gameResult = document.getElementById("game-result");
         const gameOverDiv = document.getElementById("game-over");
 
-        gameResult.innerText = `Game Over! You ${result}! Award: ${award} points`;
+        if (result === "forfeited") {
+            gameResult.innerText = "Your opponent disconnected. You win by forfeit!";
+        } else if (result === "win") {
+            gameResult.innerText = `Congratulations! You won the game! Award: ${award} points`;
+        } else if (result === "lose") {
+            gameResult.innerText = "You lost the game. Better luck next time!";
+        }
+
         gameOverDiv.style.display = "block";
 
         console.log(`Game over: You ${result}, award: ${award}`);

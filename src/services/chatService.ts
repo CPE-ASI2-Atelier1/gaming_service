@@ -20,18 +20,39 @@ export default class ChatService {
         return [user1, user2].sort().join("_");
     }
 
-    public handleMessage(senderId: number, receiverId: number, message: any): boolean {
-        const key = this.getChatKey(senderId, receiverId);
-        let chat = this.chats.get(key);
-        if (!chat) {
-            chat = new Chat(senderId, receiverId);
-            if (!chat) {
-                console.error("Failed to create Chat instance");
-                return false;
-            }
-            this.chats.set(key, chat);
+    public removeChatsByUser(userId: number): void {
+        const keysToDelete = [...this.chats.keys()].filter(key => key.includes(userId.toString()));
+        keysToDelete.forEach(key => this.chats.delete(key));
+        console.log(`Removed ${keysToDelete.length} chats associated with User ${userId}`);
+    }
+
+    public getChat(senderId: number, receiverId: number) {
+        if (senderId == null || receiverId == null) {
+            throw new Error("Sender ID or Receiver ID cannot be null or undefined.");
         }
+        const key: string = this.getChatKey(senderId, receiverId);
+        let chat: Chat = this.chats.get(key);
+        if (!chat) {
+            try {
+                chat = new Chat(senderId, receiverId);
+                this.chats.set(key, chat);
+            } catch (error) {
+                console.error(`Failed to create Chat instance for ${key}:`, error);
+                throw new Error("Unable to create a new Chat instance.");
+            }
+        }
+        return chat;
+    }
+
+    public handleMessage(senderId: number, receiverId: number, message: any): boolean {
+        let chat: Chat = this.getChat(senderId, receiverId);
         chat.addMessage( senderId, message );
         return true;
+    }
+
+    public getChat2Json(senderId: number, receiverId: number) {
+        let chat: Chat = this.getChat(senderId, receiverId);
+        const chatJson = chat.toJson();
+        return chatJson
     }
 }
