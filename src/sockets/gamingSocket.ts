@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import FightingCards from "../types/FightingCard";
 import GameService from "../services/gameService";
 import ChatService from "../services/chatService";
+import { sendMessage } from "../routers/stompClient.js";
 
 enum ACTIONS {
     SEND_MESSAGE = "SEND_MESSAGE",
@@ -104,6 +105,16 @@ export class Socket {
                             });
                             console.warn(`User ${receiverId} is not connected.`);
                         }
+                        // Envoi du message dans le bus de communication ActiveMQ
+                        sendMessage("/queue/chat.messages", {
+                            senderId,
+                            receiverId,
+                            message,
+                            timestamp: new Date(),
+                        });
+                        console.log(
+                            `Message sent to ActiveMQ: ${message} from User ${senderId} to User ${receiverId}`
+                        );
                     }
                 } catch (error) {
                     console.error("Error processing message: ", error);
