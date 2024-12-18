@@ -40,19 +40,21 @@ class GameCollection {
     }
 }
 
-export default class GameService {
+class GameService {
 
-    private static instance: GameService;
+    // private static instance: GameService;
 
     private waitingPlayers : number[] = [];
     private games: GameCollection = new GameCollection();
 
-    public static getInstance() {
-        if (!GameService.instance) {
-            GameService.instance = new GameService();
-        }
-        return GameService.instance;
-    }
+    // public static getInstance() {
+    //     if (!GameService.instance) {
+    //         GameService.instance = new GameService();
+    //     }
+    //     return GameService.instance;
+    //}
+
+    constructor() { }
 
     public processWaitingPlayer(userId: number) {
         // Look if another player is waiting
@@ -172,5 +174,6 @@ export default class GameService {
         }
         return true;
     }
-
 }
+
+export default new GameService(); // Singleton

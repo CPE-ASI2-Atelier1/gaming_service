@@ -5,6 +5,7 @@ let isMyTurn = false;
 
 document.getElementById("connectBtn").addEventListener("click", () => {
     const userId = document.getElementById("userId").value;
+    const userName = "Floppa"
 
     if (!userId) {
         alert("Please enter a valid User ID!");
@@ -13,7 +14,7 @@ document.getElementById("connectBtn").addEventListener("click", () => {
 
     // Connect to the server with the User ID as a query parameter
     socket = io("http://localhost:3000", {
-        query: { userId }
+        query: { userId, userName }
     });
 
     document.getElementById("status").innerText = `Connecting as User ${userId}...`;

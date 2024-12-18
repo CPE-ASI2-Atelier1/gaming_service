@@ -1,19 +1,9 @@
 import Chat from "../model/Chat";
 
-export default class ChatService {
-
-    // Instance unique de ChatService
-    private static instance: ChatService;
+class ChatService {
 
     // Contient la liste des discussions en cours
     private chats: Map<string, Chat> = new Map();
-
-    public static getInstance(): ChatService {
-        if (!ChatService.instance) {
-            ChatService.instance = new ChatService();
-        }
-        return ChatService.instance;
-    }
 
     // Assure la création d'une clé unique (user1Id_user2Id) pour chaque discussion
     private getChatKey(user1: number, user2: number): string {
@@ -56,3 +46,5 @@ export default class ChatService {
         return chatJson
     }
 }
+
+export default new ChatService()

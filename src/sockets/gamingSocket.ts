@@ -6,6 +6,7 @@
 import {Server} from "socket.io"
 import GameService from "../services/gameService";
 import ChatService from "../services/chatService";
+import gameService from "../services/gameService";
 
 enum ACTIONS {
     SEND_MESSAGE = "SEND_MESSAGE",
@@ -39,6 +40,7 @@ export interface MessageData {
 
 interface UserData {
     id: number;
+    // name: string
 }
 
 export type CardData = {
@@ -67,7 +69,7 @@ export class Socket {
 
     // Services partagés
     private chatService: ChatService;
-    private gameService: GameService;
+    private gameService: any;
 
     constructor(server: any) {
         this.io = new Server(server);
@@ -75,7 +77,7 @@ export class Socket {
 
         // Initialisation des services
         this.chatService = ChatService.getInstance();
-        this.gameService = GameService.getInstance();
+        this.gameService = gameService;
 
         this.io.on("connection", (socket: any): void => {
             // Connexion de l'utilisateur
@@ -219,9 +221,14 @@ export class Socket {
                 }
                 this.io.to(enemySocketId).emit(GAME_ACTIONS.RECEIVE_ACTION, {
                     cardId: targetId,
+                    targetId: cardId,
                     damage: damage
                 })
-                socket.emit(GAME_ACTIONS.ACTION_SUCCESS)
+                socket.emit(GAME_ACTIONS.ACTION_SUCCESS, {
+                    cardId: targetId,
+                    targetId: cardId,
+                    damage: damage
+                })
                 // Check if the battle is over
                 const status: number = this.gameService.isGameOver(userId)
                 if (status > 0) {
