@@ -87,39 +87,59 @@ export class Socket {
             socket.on(ACTIONS.SEND_MESSAGE, (data: MessageData): void => {
                 const { senderId, receiverId, message } = data;
                 try {
-                    const result = this.chatService.handleMessage(senderId, receiverId, message);
-
-                    // Après traitement du message, on envoie le message à l'utilisateur cible
-                    if (result) {
-                        const receiverSocketId = this.socketMap.get(receiverId);
-                        if (receiverSocketId) {
-                            this.io.to(receiverSocketId).emit(ACTIONS.RECEIVE_MESSAGE, {
-                                senderId,
-                                message,
-                                timestamp: new Date(),
-                            });
-                        } else {
-                            socket.emit(ACTIONS.USER_NOT_CONNECTED, {
-                                receiverId,
-                                message: "The user you are trying to reach is not online.",
-                            });
-                            console.warn(`User ${receiverId} is not connected.`);
-                        }
-                        // Envoi du message dans le bus de communication ActiveMQ
-                        sendMessage("/queue/chat.messages", {
+                    // Cas du broadcast (chat général)
+                    if (receiverId === 0) {
+                        const result = this.chatService.handleMessage(senderId, receiverId, message);
+                    
+                        socket.broadcast.emit(ACTIONS.RECEIVE_MESSAGE, {
                             senderId,
-                            receiverId,
                             message,
                             timestamp: new Date(),
                         });
-                        console.log(
-                            `Message sent to ActiveMQ: ${message} from User ${senderId} to User ${receiverId}`
-                        );
+                    
+                        sendMessage("/queue/chat.messages", {
+                            senderId,
+                            receiverId: 0,
+                            message,
+                            timestamp: new Date(),
+                        });
+                    
+                        console.log(`Broadcast message sent by User ${senderId}: ${message}`);
+                    } else {
+                        // Traitement standard pour un message direct
+                        const result = this.chatService.handleMessage(senderId, receiverId, message);
+            
+                        if (result) {
+                            const receiverSocketId = this.socketMap.get(receiverId);
+                            if (receiverSocketId) {
+                                this.io.to(receiverSocketId).emit(ACTIONS.RECEIVE_MESSAGE, {
+                                    senderId,
+                                    message,
+                                    timestamp: new Date(),
+                                });
+                            } else {
+                                socket.emit(ACTIONS.USER_NOT_CONNECTED, {
+                                    receiverId,
+                                    message: "The user you are trying to reach is not online.",
+                                });
+                                console.warn(`User ${receiverId} is not connected.`);
+                            }
+            
+                            sendMessage("/queue/chat.messages", {
+                                senderId,
+                                receiverId,
+                                message,
+                                timestamp: new Date(),
+                            });
+                            console.log(
+                                `Message sent to ActiveMQ: ${message} from User ${senderId} to User ${receiverId}`
+                            );
+                        }
                     }
                 } catch (error) {
                     console.error("Error processing message: ", error);
                 }
-            });
+            });            
 
             socket.on(ACTIONS.RECEIVE_MESSAGE, (data) => {
                 const { senderId, message, timestamp } = data;

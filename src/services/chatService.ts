@@ -1,3 +1,4 @@
+import { reverse } from "node:dns";
 import Chat from "../model/Chat";
 
 export default class ChatService {
@@ -27,10 +28,14 @@ export default class ChatService {
     }
 
     public getChat(senderId: number, receiverId: number) {
+        let key: string;
         if (senderId == null || receiverId == null) {
             throw new Error("Sender ID or Receiver ID cannot be null or undefined.");
+        } else if (receiverId == 0) {
+            key = "broadcast";
+        } else {
+            key = this.getChatKey(senderId, receiverId);
         }
-        const key: string = this.getChatKey(senderId, receiverId);
         let chat: Chat = this.chats.get(key);
         if (!chat) {
             try {

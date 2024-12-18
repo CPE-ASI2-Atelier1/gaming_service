@@ -28,9 +28,6 @@ function connect() {
     })
 
     socket.on("RECEIVE_MESSAGE", (data) => {
-
-        // senderid =/= received senderId => je ne fais rien !
-        // SAUF si mon sender id est 0 => broadcast 
         const messages = document.getElementById("messages");
         const newMessage = document.createElement("li");
         newMessage.textContent = `From ${data.senderId}: ${data.message}`;
