@@ -37,6 +37,7 @@ class UserDao {
     constructor({}) {
         console.log(`new UserDao`);
         this.userCollection = new UserSet();
+        this.addUser(0, "Broadcast", "0")
     }
 
     public addUser(id: number, name: string, socketId: string) {

@@ -29,6 +29,7 @@ class ChatSocketManager extends AService {
             console.log(`User ${senderId} is sending a message to ${receiverId}.`);
             try {
                 if (receiverId === 0) {
+                    const result: boolean = chatService.handleMessage(senderId, receiverId, message);
                     console.log(`Broadcast message from User ${senderId}: ${message}`);
                     socket.broadcast.emit(ACTIONS.RECEIVE_MESSAGE, {
                         senderId,

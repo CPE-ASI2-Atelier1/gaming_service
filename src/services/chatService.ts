@@ -17,7 +17,7 @@ class ChatService {
         console.log(`Removed ${keysToDelete.length} chats associated with User ${userId}`);
     }
 
-    public getChat(senderId: number, receiverId: number) {
+    private getChat(senderId: number, receiverId: number) {
         let key: string;
         if (senderId == null || receiverId == null) {
             throw new Error("Sender ID or Receiver ID cannot be null or undefined.");
