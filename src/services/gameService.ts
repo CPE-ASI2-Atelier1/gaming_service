@@ -3,7 +3,7 @@
  */
 
 import Game from "../model/Game";
-import {CardData} from "../sockets/gamingSocket";
+import {CardData} from "../sockets/types";
 
 // INterface Collection...
 

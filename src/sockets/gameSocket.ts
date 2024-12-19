@@ -3,6 +3,7 @@ import {UserData, DeckData, ActionData} from "./types";
 import gameService from "../services/gameService";
 import UserDao from "../dao/userDao";
 import userDao from "../dao/userDao";
+import AService from "../services/AService";
 
 enum GAME_ACTIONS {
     RECEIVE_ACTION = "SEND_ACTION",     // Sent to a user after an action was performed against him
@@ -18,8 +19,9 @@ enum GAME_ACTIONS {
     GAME_OVER = "GAME_OVER",            // Emitted when the game is over
 }
 
-class GameSocketManager {
-    constructor() {}
+class GameSocketManager extends AService {
+    constructor() {
+        super();}
 
     public setSocket(io: Server, socket: any): void {
         socket.on(GAME_ACTIONS.WAITING_PLAYER, (data:UserData): void => {

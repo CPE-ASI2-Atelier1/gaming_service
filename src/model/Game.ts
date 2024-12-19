@@ -2,7 +2,7 @@
  * @author Arthur Jezequel
  */
 
-import {CardData} from "../sockets/gamingSocket";
+import {CardData} from "../sockets/types";
 
 class FightingCard {
     id: number;

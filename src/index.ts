@@ -44,10 +44,10 @@ class MyApp {
             // Connexion de l'utilisateur
             const userId: number = Number(socket.handshake.query.userId);
             const userName: string = String(socket.handshake.query.userName);
-            if (userId) {
+            if (userId && userName) {
                 // TODO : Check is socket doesn't already exists (would be weird)
-                userDao.addUser(userId, userName, socket.id)
-                console.log(`User ${userId} connected with socket ID: ${socket.id}`);
+                userDao.addUser(userId, userName, socket.id);
+                console.log(`User ${userId} (${userName}) connected with socket ID: ${socket.id}`);
             }
             GameSocketManager.setSocket(this.io, socket);
             ChatSocketManager.setSocket(this.io, socket);

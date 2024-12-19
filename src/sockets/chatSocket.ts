@@ -3,6 +3,8 @@ import {MessageData} from "./types";
 import chatService from "../services/chatService";
 import userDao from "../dao/userDao";
 import { sendMessage } from "../routers/stompClient.js";
+import AService from "../services/AService";
+import User from "../model/User";
 
 enum ACTIONS {
     SEND_MESSAGE = "SEND_MESSAGE",
@@ -16,30 +18,12 @@ enum ACTIONS {
 
 // Implements SocketManager pour une belle abstraction...
 
-class ChatSocketManager {
-    constructor() {}
+class ChatSocketManager extends AService {
+    constructor() {
+        super();
+    }
 
     public setSocket(io: Server, socket: any): void {
-        io.on("connection", (socket: any): void => {
-            const userId: number = Number(socket.handshake.query.userId);
-            const userName: string = socket.handshake.query.userName;
-        
-            if (userId && userName) {
-                userDao.addUser(userId, userName, socket.id);
-                console.log(`User ${userId} (${userName}) connected with socket ID: ${socket.id}`);
-        
-                socket.on("disconnect", () => {
-                    userDao.removeUser(userId);
-                    this.handleDisconnect(userId, io);
-                    console.log(`User ${userId} (${userName}) disconnected.`);
-                });
-            } else {
-                console.warn("Missing userId or userName in connection request.");
-                socket.disconnect(true);
-            }
-        });
-        
-        
         socket.on(ACTIONS.SEND_MESSAGE, (data: MessageData): void => {
             const { senderId, receiverId, message } = data;
             console.log(`User ${senderId} is sending a message to ${receiverId}.`);
@@ -97,6 +81,9 @@ class ChatSocketManager {
 
         socket.on(ACTIONS.ON_USER_SELECT, (data): void => {
             const { senderId, receiverId } = data;
+            if (!this.isValidNumber(senderId) || !this.isValidNumber(receiverId)) {
+                return; // Error
+            }
             console.log(`User ${senderId} will now talk to ${receiverId}`);
             if (senderId === receiverId) {
                 socket.emit(ACTIONS.USER_NOT_CONNECTED, {
@@ -106,7 +93,7 @@ class ChatSocketManager {
                 console.warn(`User ${senderId} attempted to select themselves.`);
                 return;
             }
-            const receiver = userDao.getUser(parseInt(receiverId, 10));
+            const receiver: User = userDao.getUser(parseInt(receiverId, 10));
             if (!receiver) {
                 socket.emit(ACTIONS.USER_NOT_CONNECTED, {
                     receiverId,
