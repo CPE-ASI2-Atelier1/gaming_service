@@ -9,13 +9,20 @@
 <body>
     <h1>Chat Application</h1>
     <div>
-        <label for="userId">User ID: </label>
-        <input type="number" id="userId" placeholder="Enter your user ID">
+        <div>
+            <label for="userId">User ID: </label>
+            <input type="number" id="userId" placeholder="Enter your user ID">
+        </div>
+        <div>
+            <label for="userName">User Name: </label>
+            <input type="text" id="userName" placeholder="Enter your user name">
+        </div>
         <button onclick="connect()">Connect</button>
     </div>
 
     <div id="chat" style="display:none;">
         <h2>Chat</h2>
+        <h3 id="chatWith">Chatting with: </h3> <!-- Ajouté pour afficher le nom de l'interlocuteur -->
         <label for="receiverId">Receiver ID: </label>
         <input onchange="retrieveMessage()" type="number" id="receiverId" placeholder="Enter receiver ID">
         <br>

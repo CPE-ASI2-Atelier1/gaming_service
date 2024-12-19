@@ -5,7 +5,7 @@
 
 import {Server} from "socket.io"
 import GameService from "../services/gameService";
-import ChatService from "../services/chatService";
+import chatService from "../services/chatService";
 import { sendMessage } from "../routers/stompClient.js";
 import gameService from "../services/gameService";
 
@@ -67,9 +67,6 @@ export class Socket {
     private io;
 
     private socketMap : Map<number, number>;
-
-    // Services partagés
-    private chatService: ChatService;
     private gameService: any;
 
     constructor(server: any) {
@@ -77,7 +74,6 @@ export class Socket {
         this.socketMap = new Map();
 
         // Initialisation des services
-        this.chatService = ChatService.getInstance();
         this.gameService = gameService;
 
         this.io.on("connection", (socket: any): void => {
@@ -93,7 +89,7 @@ export class Socket {
             socket.on("disconnect", () => {
                 this.socketMap.delete(userId);
                 console.log(`User ${userId} disconnected.`);
-                this.chatService.removeChatsByUser(userId);
+                chatService.removeChatsByUser(userId);
                 if (this.gameService.isUserFighting(userId)) {
                     console.log(`User ${userId} was in a fight... Forfeiting...`);
                     const enemySocketId: number = this.socketMap.get(this.gameService.getOtherPlayer(userId))
@@ -114,7 +110,7 @@ export class Socket {
                     return;
                 }
                 try {
-                    const body: string = this.chatService.getChat2Json(senderId, receiverId);
+                    const body: string = chatService.getChat2Json(senderId, receiverId);
                     socket.emit(ACTIONS.ON_USER_SELECTED, {
                         participants: JSON.parse(body).participants,
                         messages: JSON.parse(body).messages,
@@ -261,7 +257,7 @@ export class Socket {
                 try {
                     // Cas du broadcast (chat général)
                     if (receiverId === 0) {
-                        const result = this.chatService.handleMessage(senderId, receiverId, message);
+                        const result = chatService.handleMessage(senderId, receiverId, message);
                     
                         socket.broadcast.emit(ACTIONS.RECEIVE_MESSAGE, {
                             senderId,
@@ -279,7 +275,7 @@ export class Socket {
                         console.log(`Broadcast message sent by User ${senderId}: ${message}`);
                     } else {
                         // Traitement standard pour un message direct
-                        const result = this.chatService.handleMessage(senderId, receiverId, message);
+                        const result = chatService.handleMessage(senderId, receiverId, message);
             
                         if (result) {
                             const receiverSocketId = this.socketMap.get(receiverId);
