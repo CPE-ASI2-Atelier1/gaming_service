@@ -19,6 +19,10 @@ function connect() {
         document.getElementById("chat").style.display = "block";
     });
 
+    socket.on("UPDATE_CONNECTED_USERS", (data) => {
+        console.log("CONNECTED USERS", data);
+    })
+
     socket.on("ON_USER_SELECTED", (data) => {
         const { participants, messages, receiverName } = data;
 

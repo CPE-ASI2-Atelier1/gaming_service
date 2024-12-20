@@ -134,7 +134,7 @@ class GameService {
         if (game == null) {
             return -1;
         }
-        const otherUserId = game.getOtherUser(userId);
+        const otherUserId: number = game.getOtherUser(userId);
         this.games.removeByUser(userId);
         return otherUserId;
     }

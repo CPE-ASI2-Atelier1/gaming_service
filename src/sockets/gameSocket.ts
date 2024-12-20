@@ -25,9 +25,11 @@ class GameSocketManager extends AService {
 
     public setSocket(io: Server, socket: any): void {
         socket.on(GAME_ACTIONS.WAITING_PLAYER, (data:UserData): void => {
-            console.log("WAITING PLAYER");
             const userId: number = data.id;
             const enemyId: number = gameService.processWaitingPlayer(userId)
+            if (gameService.isUserFighting(userId)){
+                console.error(`User ${userId} is already fighting !`)
+            }
             console.log(`User ${userId} is waiting for a fight...`)
             // If an enemy is available, fight
             if (enemyId > 0){
@@ -47,6 +49,9 @@ class GameSocketManager extends AService {
         // Selection cards
         socket.on(GAME_ACTIONS.WAITING_CARDS, (data: DeckData): void => {
             const {id, cards} = data;
+            if (gameService.isUserFighting(id)){
+                console.error(`User ${id} is already fighting !`)
+            }
             console.log(`User ${id} is waiting for its opponent to pick up their cards...`);
             const enemyId: number = gameService.processWaitingCards(id, cards);
             // If other player also selected its cards, start the battle
